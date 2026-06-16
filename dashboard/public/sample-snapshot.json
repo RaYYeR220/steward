@@ -1,0 +1,499 @@
+{
+  "scan": {
+    "resources": [
+      {
+        "id": "i-prod-web",
+        "type": "ecs_instance",
+        "name": "prod-web",
+        "status": "running",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 210.0,
+        "cost_source": "exact",
+        "tags": {
+          "env": "production"
+        },
+        "age_days": 400,
+        "attached_to": null
+      },
+      {
+        "id": "d-prod-web-root",
+        "type": "disk",
+        "name": "prod-web-root",
+        "status": "in_use",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 12.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 400,
+        "attached_to": "i-prod-web"
+      },
+      {
+        "id": "eip-prod",
+        "type": "eip",
+        "name": "prod-web-ip",
+        "status": "in_use",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 3.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 400,
+        "attached_to": "i-prod-web"
+      },
+      {
+        "id": "i-staging-app",
+        "type": "ecs_instance",
+        "name": "staging-app",
+        "status": "running",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 560.0,
+        "cost_source": "exact",
+        "tags": {
+          "env": "staging"
+        },
+        "age_days": 210,
+        "attached_to": null
+      },
+      {
+        "id": "i-prod-batch",
+        "type": "ecs_instance",
+        "name": "prod-batch",
+        "status": "running",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 280.0,
+        "cost_source": "exact",
+        "tags": {
+          "env": "production"
+        },
+        "age_days": 300,
+        "attached_to": null
+      },
+      {
+        "id": "eip-orphan",
+        "type": "eip",
+        "name": "old-lb-ip",
+        "status": "available",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 9.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 150,
+        "attached_to": null
+      },
+      {
+        "id": "d-orphan-1",
+        "type": "disk",
+        "name": "old-data-disk",
+        "status": "available",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 44.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 90,
+        "attached_to": null
+      },
+      {
+        "id": "d-orphan-2",
+        "type": "disk",
+        "name": "migration-temp",
+        "status": "available",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 18.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 45,
+        "attached_to": null
+      },
+      {
+        "id": "snap-old-1",
+        "type": "snapshot",
+        "name": "backup-2024-q3",
+        "status": "available",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 6.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 420,
+        "attached_to": null
+      },
+      {
+        "id": "snap-old-2",
+        "type": "snapshot",
+        "name": "backup-2024-q4",
+        "status": "available",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 6.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 330,
+        "attached_to": null
+      },
+      {
+        "id": "oss-archives",
+        "type": "oss_bucket",
+        "name": "company-archives",
+        "status": "in_use",
+        "region": "eu-central-1",
+        "monthly_cost_usd": 130.0,
+        "cost_source": "exact",
+        "tags": {},
+        "age_days": 600,
+        "attached_to": null
+      }
+    ],
+    "findings": [
+      {
+        "kind": "ecs_overprovisioned",
+        "resource_id": "i-staging-app",
+        "evidence": "avg CPU 3.2%, max 18.5% over 14d; downsize ecs.g7.4xlarge -> ecs.g7.2xlarge",
+        "monthly_saving_usd": 280.0,
+        "action_type": "resize_ecs",
+        "source": "detector"
+      },
+      {
+        "kind": "ecs_overprovisioned",
+        "resource_id": "i-prod-batch",
+        "evidence": "avg CPU 4.0%, max 22.0% over 14d; downsize ecs.c7.2xlarge -> ecs.c7.xlarge",
+        "monthly_saving_usd": 140.0,
+        "action_type": "resize_ecs",
+        "source": "detector"
+      },
+      {
+        "kind": "idle_eip",
+        "resource_id": "eip-orphan",
+        "evidence": "not attached to any instance; idle EIPs still bill hourly",
+        "monthly_saving_usd": 9.0,
+        "action_type": "release_eip",
+        "source": "detector"
+      },
+      {
+        "kind": "unattached_disk",
+        "resource_id": "d-orphan-1",
+        "evidence": "not attached to any instance (created 90d ago); deletion is snapshot-protected",
+        "monthly_saving_usd": 44.0,
+        "action_type": "delete_disk",
+        "source": "detector"
+      },
+      {
+        "kind": "unattached_disk",
+        "resource_id": "d-orphan-2",
+        "evidence": "not attached to any instance (created 45d ago); deletion is snapshot-protected",
+        "monthly_saving_usd": 18.0,
+        "action_type": "delete_disk",
+        "source": "detector"
+      },
+      {
+        "kind": "old_snapshot",
+        "resource_id": "snap-old-1",
+        "evidence": "420d old and its source disk no longer exists",
+        "monthly_saving_usd": 6.0,
+        "action_type": "delete_snapshot",
+        "source": "detector"
+      },
+      {
+        "kind": "old_snapshot",
+        "resource_id": "snap-old-2",
+        "evidence": "330d old and its source disk no longer exists",
+        "monthly_saving_usd": 6.0,
+        "action_type": "delete_snapshot",
+        "source": "detector"
+      },
+      {
+        "kind": "oss_cold_bucket",
+        "resource_id": "oss-archives",
+        "evidence": "900/80000 objects accessed in 30d (1.1%); move Standard -> IA",
+        "monthly_saving_usd": 58.5,
+        "action_type": "change_oss_class",
+        "source": "detector"
+      }
+    ],
+    "total_monthly_usd": 1278.0,
+    "potential_saving_usd": 561.5,
+    "warnings": []
+  },
+  "plan": {
+    "decisions": [
+      {
+        "resource_id": "eip-orphan",
+        "action_type": "release_eip",
+        "monthly_saving_usd": 9.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for release_eip: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "snap-old-1",
+        "action_type": "delete_snapshot",
+        "monthly_saving_usd": 6.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for delete_snapshot: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "snap-old-2",
+        "action_type": "delete_snapshot",
+        "monthly_saving_usd": 6.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for delete_snapshot: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "oss-archives",
+        "action_type": "change_oss_class",
+        "monthly_saving_usd": 58.5,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for change_oss_class: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "d-orphan-1",
+        "action_type": "delete_disk",
+        "monthly_saving_usd": 44.0,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for delete_disk: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "d-orphan-2",
+        "action_type": "delete_disk",
+        "monthly_saving_usd": 18.0,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for delete_disk: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "i-staging-app",
+        "action_type": "resize_ecs",
+        "monthly_saving_usd": 280.0,
+        "blast_radius": 4,
+        "blast_reasons": [
+          "base risk for resize_ecs: 3",
+          "resource is currently running (action causes interruption)"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "i-prod-batch",
+        "action_type": "resize_ecs",
+        "monthly_saving_usd": 140.0,
+        "blast_radius": 4,
+        "blast_reasons": [
+          "base risk for resize_ecs: 3",
+          "resource is currently running (action causes interruption)"
+        ],
+        "allowed": false,
+        "reasons": [
+          "protected by tag env=production",
+          "monthly-change budget $500 would be exceeded"
+        ],
+        "source": "detector"
+      }
+    ],
+    "allowed_saving_usd": 421.5,
+    "blocked_saving_usd": 140.0
+  },
+  "agent": {
+    "narrative": "Reviewed 11 resources; the detectors already cover the waste here.",
+    "findings": [
+      {
+        "kind": "ecs_overprovisioned",
+        "resource_id": "i-staging-app",
+        "evidence": "avg CPU 3.2%, max 18.5% over 14d; downsize ecs.g7.4xlarge -> ecs.g7.2xlarge",
+        "monthly_saving_usd": 280.0,
+        "action_type": "resize_ecs",
+        "source": "detector"
+      },
+      {
+        "kind": "ecs_overprovisioned",
+        "resource_id": "i-prod-batch",
+        "evidence": "avg CPU 4.0%, max 22.0% over 14d; downsize ecs.c7.2xlarge -> ecs.c7.xlarge",
+        "monthly_saving_usd": 140.0,
+        "action_type": "resize_ecs",
+        "source": "detector"
+      },
+      {
+        "kind": "idle_eip",
+        "resource_id": "eip-orphan",
+        "evidence": "not attached to any instance; idle EIPs still bill hourly",
+        "monthly_saving_usd": 9.0,
+        "action_type": "release_eip",
+        "source": "detector"
+      },
+      {
+        "kind": "unattached_disk",
+        "resource_id": "d-orphan-1",
+        "evidence": "not attached to any instance (created 90d ago); deletion is snapshot-protected",
+        "monthly_saving_usd": 44.0,
+        "action_type": "delete_disk",
+        "source": "detector"
+      },
+      {
+        "kind": "unattached_disk",
+        "resource_id": "d-orphan-2",
+        "evidence": "not attached to any instance (created 45d ago); deletion is snapshot-protected",
+        "monthly_saving_usd": 18.0,
+        "action_type": "delete_disk",
+        "source": "detector"
+      },
+      {
+        "kind": "old_snapshot",
+        "resource_id": "snap-old-1",
+        "evidence": "420d old and its source disk no longer exists",
+        "monthly_saving_usd": 6.0,
+        "action_type": "delete_snapshot",
+        "source": "detector"
+      },
+      {
+        "kind": "old_snapshot",
+        "resource_id": "snap-old-2",
+        "evidence": "330d old and its source disk no longer exists",
+        "monthly_saving_usd": 6.0,
+        "action_type": "delete_snapshot",
+        "source": "detector"
+      },
+      {
+        "kind": "oss_cold_bucket",
+        "resource_id": "oss-archives",
+        "evidence": "900/80000 objects accessed in 30d (1.1%); move Standard -> IA",
+        "monthly_saving_usd": 58.5,
+        "action_type": "change_oss_class",
+        "source": "detector"
+      }
+    ],
+    "decisions": [
+      {
+        "resource_id": "eip-orphan",
+        "action_type": "release_eip",
+        "monthly_saving_usd": 9.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for release_eip: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "snap-old-1",
+        "action_type": "delete_snapshot",
+        "monthly_saving_usd": 6.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for delete_snapshot: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "snap-old-2",
+        "action_type": "delete_snapshot",
+        "monthly_saving_usd": 6.0,
+        "blast_radius": 1,
+        "blast_reasons": [
+          "base risk for delete_snapshot: 1"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "oss-archives",
+        "action_type": "change_oss_class",
+        "monthly_saving_usd": 58.5,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for change_oss_class: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "d-orphan-1",
+        "action_type": "delete_disk",
+        "monthly_saving_usd": 44.0,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for delete_disk: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "d-orphan-2",
+        "action_type": "delete_disk",
+        "monthly_saving_usd": 18.0,
+        "blast_radius": 2,
+        "blast_reasons": [
+          "base risk for delete_disk: 2"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "i-staging-app",
+        "action_type": "resize_ecs",
+        "monthly_saving_usd": 280.0,
+        "blast_radius": 4,
+        "blast_reasons": [
+          "base risk for resize_ecs: 3",
+          "resource is currently running (action causes interruption)"
+        ],
+        "allowed": true,
+        "reasons": [],
+        "source": "detector"
+      },
+      {
+        "resource_id": "i-prod-batch",
+        "action_type": "resize_ecs",
+        "monthly_saving_usd": 140.0,
+        "blast_radius": 4,
+        "blast_reasons": [
+          "base risk for resize_ecs: 3",
+          "resource is currently running (action causes interruption)"
+        ],
+        "allowed": false,
+        "reasons": [
+          "protected by tag env=production",
+          "monthly-change budget $500 would be exceeded"
+        ],
+        "source": "detector"
+      }
+    ],
+    "allowed_saving_usd": 421.5,
+    "blocked_saving_usd": 140.0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "degraded": false,
+    "degraded_reason": null,
+    "transcript": []
+  }
+}

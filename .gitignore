@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+reports/
+.env
+
+# Internal working artifacts — not part of the public project
+.remember/
+docs/superpowers/

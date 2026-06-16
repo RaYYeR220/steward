@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Steward — "mission-control FinOps" design system
+   Dark instrument-panel aesthetic. Mono for figures/IDs, grotesque for prose.
+   ========================================================================== */
+
+@theme {
+  --font-display: "Space Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  /* core palette — deep slate control-room */
+  --color-void: #07090e;
+  --color-panel: #0d1018;
+  --color-panel-2: #11151f;
+  --color-edge: #1d2230;
+  --color-edge-2: #2a3142;
+  --color-ink: #e6ebf4;
+  --color-ink-dim: #8b93a7;
+  --color-ink-faint: #5a6175;
+
+  /* semantic */
+  --color-allow: #3ddc97;
+  --color-allow-glow: #3ddc9733;
+  --color-block: #ff5d6c;
+  --color-block-glow: #ff5d6c33;
+  --color-warn: #ffb84d;
+  --color-brand: #36e3ff;
+  --color-brand-2: #5b8cff;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* layered atmosphere: two radial glows + a fine engineering grid */
+  background-image:
+    radial-gradient(900px 520px at 78% -8%, rgba(54, 227, 255, 0.1), transparent 60%),
+    radial-gradient(760px 520px at 8% 6%, rgba(91, 140, 255, 0.08), transparent 55%),
+    linear-gradient(transparent 0 calc(100% - 1px), rgba(255, 255, 255, 0.018) calc(100% - 1px)),
+    linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(255, 255, 255, 0.018) calc(100% - 1px));
+  background-size: 100% 100%, 100% 100%, 100% 34px, 34px 100%;
+  background-attachment: fixed;
+}
+
+/* tabular numerals everywhere figures appear */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* a faint scanline texture for terminal surfaces */
+.scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.022) 0px,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* thin custom scrollbar for the log stream */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge-2) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-edge-2);
+  border-radius: 99px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---- micro-animations ---------------------------------------------------- */
+@keyframes steward-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes steward-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes steward-sweep {
+  from {
+    background-position: -160% 0;
+  }
+  to {
+    background-position: 260% 0;
+  }
+}
+
+.rise {
+  animation: steward-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.live-dot {
+  animation: steward-pulse 1.6s ease-in-out infinite;
+}
+
+/* shimmering hero figure */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--color-allow) 0%,
+    #aef9d6 38%,
+    var(--color-brand) 64%,
+    var(--color-allow) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: steward-sweep 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
