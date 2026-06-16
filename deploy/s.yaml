@@ -1,0 +1,47 @@
+# Steward — Alibaba Function Compute (FC 3.0) deploy via Serverless Devs (`s`).
+# One container serves the SPA (inline) + the /api/* endpoints. Read-only / dry-run:
+# STEWARD_API_PROVIDERS=mock means the public function can never touch a real account.
+#
+# Prereqs (see ./README.md): FC + Container Registry activated, and the RAM user
+# whose AccessKey `s` uses must have AliyunFCFullAccess + AliyunContainerRegistryFullAccess.
+#
+# Deploy:
+#   export STEWARD_IMAGE=registry.eu-central-1.cr.aliyuncs.com/<namespace>/steward:latest
+#   export QWEN_API_KEY=...        # optional; enables the live agent on the deployed site
+#   # build + push the repo-root Dockerfile image to that ACR path, then:
+#   s deploy -y
+edition: 3.0.0
+name: steward-dashboard
+access: default
+
+vars:
+  region: eu-central-1
+
+resources:
+  steward:
+    component: fc3
+    props:
+      region: ${vars.region}
+      functionName: steward-dashboard
+      description: Steward — autonomous FinOps dashboard + API (read-only / dry-run, mock provider)
+      runtime: custom-container
+      cpu: 0.35
+      memorySize: 512
+      diskSize: 512
+      timeout: 60
+      instanceConcurrency: 10
+      port: 9000
+      customContainerConfig:
+        image: ${env('STEWARD_IMAGE')}
+      environmentVariables:
+        STEWARD_API_PROVIDERS: mock
+        STEWARD_SPA_DIR: /app/dashboard/dist
+        QWEN_API_KEY: ${env('QWEN_API_KEY')}
+      triggers:
+        - triggerName: http
+          triggerType: http
+          triggerConfig:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
