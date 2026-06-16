@@ -221,6 +221,15 @@ def create_app() -> FastAPI:
 
         return StreamingResponse(generate(), media_type="text/event-stream")
 
+    # Optionally serve the built SPA from the same origin (the Function Compute
+    # deploy sets STEWARD_SPA_DIR to dashboard/dist). Mounted LAST so every
+    # /api/* route above takes precedence; html=True serves index.html at "/".
+    spa_dir = os.environ.get("STEWARD_SPA_DIR")
+    if spa_dir and os.path.isdir(spa_dir):
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/", StaticFiles(directory=spa_dir, html=True), name="spa")
+
     return app
 
 

@@ -1,8 +1,17 @@
 import type { AgentResponse, PlanResponse, ScanResponse } from "./types"
 
-// Single source of truth for the backend base URL. Empty => static $0 mode:
-// the SPA renders the bundled sample-snapshot.json with no backend at all.
-export const BASE = import.meta.env.VITE_API_BASE ?? ""
+// Single source of truth for the backend base URL.
+//   ""        => static $0 mode: render the bundled sample-snapshot.json, no backend.
+//   "@origin" => live API on the same origin the SPA is served from (the Function
+//                Compute deploy serves both the SPA and /api/* — no build-time URL).
+//   <url>     => live API at an explicit base (local dev against a separate backend).
+const RAW_BASE = import.meta.env.VITE_API_BASE ?? ""
+export const BASE =
+  RAW_BASE === "@origin"
+    ? typeof window !== "undefined"
+      ? window.location.origin
+      : ""
+    : RAW_BASE
 
 async function getJSON<T>(path: string): Promise<T> {
   if (!BASE) {
