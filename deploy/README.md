@@ -1,9 +1,34 @@
 # Phase 5 — deploy to Alibaba Cloud
 
-Steward deploys as a **single Function Compute (FC 3.0) container** that serves the
-React dashboard *and* the `/api/*` endpoints from one HTTPS URL. The function is
-**read-only / dry-run** (`STEWARD_API_PROVIDERS=mock`) — a public deployment can
-never touch a real cloud account; the real, reversible mutations stay in the CLI.
+## Live
+
+- **Backend (Alibaba Function Compute):** https://stewardashboard-ysmogrzgbv.eu-central-1.fcapp.run
+  — FC 3.0 custom-runtime web function serving the engine + `/api/*` (read-only / dry-run,
+  `STEWARD_API_PROVIDERS=mock`). Config: `deploy/fc/`.
+- **Browsable dashboard (GitHub Pages):** https://rayyer220.github.io/steward/
+  — the SPA, built with `VITE_API_BASE=<the FC URL>`, rendered inline and calling the
+  live FC API (the function has CORS `*`). This is the clickable demo.
+
+The FC system domain `*.fcapp.run` force-downloads HTML (Alibaba anti-phishing), so the
+SPA is hosted on GitHub Pages for in-browser rendering while the **backend runs on
+Alibaba**. To serve everything from one Alibaba URL instead, bind a custom domain (CNAME)
+to the function in the FC console.
+
+### Redeploy the GitHub Pages frontend
+```powershell
+# IMPORTANT: build in PowerShell, NOT Git Bash — Git Bash mangles --base=/steward/
+# into a Windows path. .env.production.local pins VITE_API_BASE to the FC URL.
+cd dashboard; npm run build -- --base=/steward/
+# then push dashboard/dist to the gh-pages branch (root), with an empty .nojekyll file.
+```
+
+---
+
+Steward also deploys as a **single Function Compute (FC 3.0) container** that serves the
+React dashboard *and* the `/api/*` endpoints from one HTTPS URL (`deploy/s.yaml` +
+repo-root `Dockerfile`; needs a container registry). The function is **read-only / dry-run**
+(`STEWARD_API_PROVIDERS=mock`) — a public deployment can never touch a real cloud account;
+the real, reversible mutations stay in the CLI.
 
 ## Why Function Compute (not OSS static)
 

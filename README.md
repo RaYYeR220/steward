@@ -7,6 +7,10 @@ automatically when a post-execution health check fails.
 
 Built for the Qwen Cloud Global AI Hackathon (Autopilot Agent track).
 
+**▶ Live demo:** [dashboard](https://rayyer220.github.io/steward/) (GitHub Pages SPA) →
+[backend API](https://stewardashboard-ysmogrzgbv.eu-central-1.fcapp.run/api/health)
+(live on **Alibaba Function Compute**, read-only / dry-run).
+
 ## How it works
 
 ```
