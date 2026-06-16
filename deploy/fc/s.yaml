@@ -1,0 +1,37 @@
+edition: 3.0.0
+name: steward-dashboard
+access: default
+
+vars:
+  region: eu-central-1
+
+resources:
+  steward:
+    component: fc3
+    props:
+      region: ${vars.region}
+      functionName: steward-dashboard
+      description: Steward FinOps dashboard + API (read-only / dry-run)
+      runtime: custom.debian10
+      cpu: 0.35
+      memorySize: 512
+      diskSize: 512
+      timeout: 60
+      instanceConcurrency: 10
+      code: ./code
+      customRuntimeConfig:
+        command:
+          - ./bootstrap
+        port: 9000
+      environmentVariables:
+        STEWARD_API_PROVIDERS: mock
+        STEWARD_SPA_DIR: /code/dashboard/dist
+        QWEN_API_KEY: ${env('QWEN_API_KEY')}
+      triggers:
+        - triggerName: http
+          triggerType: http
+          triggerConfig:
+            authType: anonymous
+            methods:
+              - GET
+              - POST

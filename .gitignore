@@ -9,3 +9,8 @@ reports/
 # Internal working artifacts — not part of the public project
 .remember/
 docs/superpowers/
+
+# FC deploy build artifacts (installed deps + compiled source copy)
+deploy/fc/code/python/
+deploy/fc/code/steward/
+deploy/fc/code/dashboard/
