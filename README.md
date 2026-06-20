@@ -9,7 +9,9 @@ Built for the Qwen Cloud Global AI Hackathon (Autopilot Agent track).
 
 **▶ Live demo:** [dashboard](https://rayyer220.github.io/steward/) (GitHub Pages SPA) →
 [backend API](https://stewardashboard-ysmogrzgbv.eu-central-1.fcapp.run/api/health)
-(live on **Alibaba Function Compute**, read-only / dry-run).
+(live on **Alibaba Function Compute**, read-only / dry-run) · **🎥 [Demo video](https://youtu.be/AzUB1X2JBls)**
+
+![Steward dashboard](docs/dashboard.png)
 
 ## How it works
 
@@ -34,6 +36,12 @@ discover ──> detect ──> plan ──> gate ──> execute ──> verify
   after execution, and rolls back automatically on failure. Disk deletions
   take a safety snapshot first, making them reversible. A failure halts the
   batch — it never cascades.
+
+![Architecture](docs/architecture.png)
+
+One engine, two providers behind a single port (a mock for tests, the real
+Alibaba SDK), a thin read-only API, a static SPA — deployed on Alibaba Function
+Compute. Reads are free; inference runs on the Qwen voucher; safe by construction.
 
 ## Try it (no cloud account needed)
 
@@ -127,7 +135,7 @@ and remove it with `scripts/teardown_sandbox.py`.
 - [x] Phase 2 — Qwen agent loop: Qwen3.7-Max plans and explains via function calling
 - [x] Phase 3 — real Alibaba Cloud adapter (ECS, EIP, EBS, OSS + billing APIs)
 - [x] Phase 4 — web dashboard
-- [ ] Phase 5 — deployment on Alibaba Cloud Function Compute
+- [x] Phase 5 — deployed live on Alibaba Cloud Function Compute
 
 ## Dashboard (web)
 
@@ -148,8 +156,13 @@ npm install && npm run dev
 
 The dashboard is **safe by construction**: the API is dry-run only, providers
 are gated by `STEWARD_API_PROVIDERS`, and a missing key degrades gracefully.
-With no backend configured the SPA renders a bundled sample snapshot, so it
-deploys to OSS static hosting at $0.
+With no backend configured the SPA renders a bundled sample snapshot, so it can
+be hosted statically at $0.
+
+**Deployed live:** the backend runs on Alibaba Function Compute (custom-runtime
+web function, read-only / `mock` provider) and the SPA on GitHub Pages, calling
+the live API cross-origin — see [`deploy/`](deploy/). The deploy is $0 on the
+Function Compute free tier.
 
 ## License
 
