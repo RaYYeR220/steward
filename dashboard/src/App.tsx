@@ -23,26 +23,26 @@ export default function App() {
 
   function onRunAgent() {
     setLines([]); setNarrative(null); setRunning(true)
-    if (!BASE) {
-      // static $0 mode: no backend, render the bundled sample agent result
-      runAgent(provider).then((a) => {
-        setNarrative(a.narrative)
-        setPlan({ decisions: a.decisions, allowed_saving_usd: a.allowed_saving_usd, blocked_saving_usd: a.blocked_saving_usd })
-        setRunning(false)
-      })
+    const usePoll = import.meta.env.VITE_AGENT_MODE === "poll"
+    if (!BASE || usePoll) {
+      runAgent(provider)
+        .then((a) => {
+          setNarrative(a.narrative)
+          setPlan({ decisions: a.decisions, allowed_saving_usd: a.allowed_saving_usd, blocked_saving_usd: a.blocked_saving_usd })
+          // surface the transcript as feed lines (no live stream in poll mode)
+          setLines((a.transcript ?? []).map((e: any) => ({
+            name: e.tool_calls ? "tool_call" : e.role === "tool" ? "tool_result" : "narrative",
+            text: JSON.stringify(e).slice(0, 200),
+          })))
+          setRunning(false)
+        })
+        .catch((err) => { setNarrative(`agent error: ${err?.message ?? err}`); setRunning(false) })
       return
     }
     streamAgent(provider, (name, data) => {
-      if (name === "done") {
-        setNarrative(data.narrative)
-        setPlan({ decisions: data.decisions, allowed_saving_usd: data.allowed_saving_usd, blocked_saving_usd: data.blocked_saving_usd })
-        setRunning(false)
-      } else if (name === "error") {
-        setNarrative(`agent stream error: ${data.error ?? "unknown"}`)
-        setRunning(false)
-      } else {
-        setLines((prev) => [...prev, { name, text: JSON.stringify(data).slice(0, 200) }])
-      }
+      if (name === "done") { setNarrative(data.narrative); setPlan({ decisions: data.decisions, allowed_saving_usd: data.allowed_saving_usd, blocked_saving_usd: data.blocked_saving_usd }); setRunning(false) }
+      else if (name === "error") { setNarrative(`agent stream error: ${data.error ?? "unknown"}`); setRunning(false) }
+      else setLines((prev) => [...prev, { name, text: JSON.stringify(data).slice(0, 200) }])
     })
   }
 

@@ -69,6 +69,13 @@ def _make_llm_client():
         return None, str(exc)
 
 
+def _agent_max_tool_calls() -> int:
+    try:
+        return int(os.environ.get("STEWARD_AGENT_MAX_TOOL_CALLS", "20"))
+    except ValueError:
+        return 20
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="Steward API", version="0.1.0")
     app.add_middleware(
@@ -125,7 +132,7 @@ def create_app() -> FastAPI:
                 degraded_reason=problem,
             )
         else:
-            agent_result = investigate(provider, detector_findings, client)
+            agent_result = investigate(provider, detector_findings, client, max_tool_calls=_agent_max_tool_calls())
         findings = detector_findings + list(agent_result.findings)
         plan = build_plan(findings, provider)
         policy = Policy(
@@ -184,6 +191,7 @@ def create_app() -> FastAPI:
                     result = investigate(
                         prov, detector_findings, client,
                         on_event=lambda e: events.put(e),
+                        max_tool_calls=_agent_max_tool_calls(),
                     )
                 findings = detector_findings + list(result.findings)
                 plan = build_plan(findings, prov)

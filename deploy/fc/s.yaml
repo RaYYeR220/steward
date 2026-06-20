@@ -16,7 +16,7 @@ resources:
       cpu: 0.35
       memorySize: 512
       diskSize: 512
-      timeout: 60
+      timeout: 300
       instanceConcurrency: 10
       code: ./code
       customRuntimeConfig:
@@ -27,6 +27,7 @@ resources:
         STEWARD_API_PROVIDERS: mock
         STEWARD_SPA_DIR: /code/dashboard/dist
         QWEN_API_KEY: ${env('QWEN_API_KEY')}
+        STEWARD_AGENT_MAX_TOOL_CALLS: "10"
       triggers:
         - triggerName: http
           triggerType: http
