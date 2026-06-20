@@ -125,13 +125,13 @@ export default function App() {
         </div>
 
         {/* ── hero ───────────────────────────────────────────────── */}
-        <div className="mb-6">
+        <div className="mb-6" id="rec-hero">
           <BillChart before={before} after={after} />
         </div>
 
         {/* ── plan + agent ───────────────────────────────────────── */}
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_1fr]">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6" id="rec-plan">
             {plan && <PlanTable decisions={plan.decisions} />}
             {plan && <RunLog decisions={plan.decisions} />}
           </div>

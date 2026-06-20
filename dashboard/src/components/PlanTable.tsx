@@ -61,59 +61,64 @@ export function PlanTable({ decisions }: { decisions: Decision[] }) {
           return (
             <li
               key={d.resource_id + d.action_type}
-              className={`group grid grid-cols-1 items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors lg:grid-cols-[1.5fr_1fr_auto_auto] lg:gap-4 ${
+              className={`group rounded-xl border px-3.5 py-3 transition-colors ${
                 d.allowed
                   ? "border-[var(--color-edge)] bg-[var(--color-panel-2)]/60 hover:border-[var(--color-allow)]/30"
                   : "border-[var(--color-block)]/25 bg-[var(--color-block)]/[0.04] hover:border-[var(--color-block)]/45"
               }`}
             >
-              {/* resource + action */}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      background: d.allowed
-                        ? "var(--color-allow)"
-                        : "var(--color-block)",
-                    }}
-                  />
-                  <span className="tnum truncate font-[family-name:var(--font-mono)] text-sm font-semibold text-[var(--color-ink)]">
-                    {d.resource_id}
-                  </span>
-                </div>
-                <div className="mt-1 pl-4 text-xs text-[var(--color-ink-dim)]">
-                  {action}
-                  {d.source && (
-                    <span className="ml-1.5 text-[var(--color-ink-faint)]">
-                      · {d.source}
+              {/* aligned columns — fixed regardless of reason length */}
+              <div className="grid grid-cols-1 items-center gap-3 lg:grid-cols-[1.5fr_1fr_auto_auto] lg:gap-4">
+                {/* resource + action */}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{
+                        background: d.allowed
+                          ? "var(--color-allow)"
+                          : "var(--color-block)",
+                      }}
+                    />
+                    <span className="tnum truncate font-[family-name:var(--font-mono)] text-sm font-semibold text-[var(--color-ink)]">
+                      {d.resource_id}
                     </span>
-                  )}
+                  </div>
+                  <div className="mt-1 pl-4 text-xs text-[var(--color-ink-dim)]">
+                    {action}
+                    {d.source && (
+                      <span className="ml-1.5 text-[var(--color-ink-faint)]">
+                        · {d.source}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* blast */}
+                <div className="pl-4 lg:pl-0">
+                  <BlastMeter value={d.blast_radius} />
+                </div>
+
+                {/* saving */}
+                <div className="pl-4 text-left lg:pl-0 lg:text-right">
+                  <span className="tnum font-[family-name:var(--font-mono)] text-sm font-semibold text-[var(--color-ink)]">
+                    <span className="text-[var(--color-ink-faint)]">$</span>
+                    {usd(d.monthly_saving_usd)}
+                  </span>
+                </div>
+
+                {/* gate badge */}
+                <div className="flex pl-4 lg:justify-end lg:pl-0">
+                  <GateBadge allowed={d.allowed} />
                 </div>
               </div>
 
-              {/* blast */}
-              <div className="pl-4 lg:pl-0">
-                <BlastMeter value={d.blast_radius} />
-              </div>
-
-              {/* saving */}
-              <div className="pl-4 text-left lg:pl-0 lg:text-right">
-                <span className="tnum font-[family-name:var(--font-mono)] text-sm font-semibold text-[var(--color-ink)]">
-                  <span className="text-[var(--color-ink-faint)]">$</span>
-                  {usd(d.monthly_saving_usd)}
-                </span>
-              </div>
-
-              {/* gate + reason */}
-              <div className="flex min-w-0 flex-col items-start gap-1.5 pl-4 lg:items-end lg:pl-0">
-                <GateBadge allowed={d.allowed} />
-                {!d.allowed && d.reasons.length > 0 && (
-                  <span className="max-w-full font-[family-name:var(--font-mono)] text-[11px] leading-snug text-[var(--color-block)]/85 lg:text-right">
-                    {d.reasons.join("; ")}
-                  </span>
-                )}
-              </div>
+              {/* block reason — own full-width line, never shifts the columns */}
+              {!d.allowed && d.reasons.length > 0 && (
+                <div className="mt-2.5 border-t border-[var(--color-block)]/15 pt-2 pl-4 font-[family-name:var(--font-mono)] text-[11px] leading-snug text-[var(--color-block)]/85 lg:pl-0 lg:text-right">
+                  {d.reasons.join("; ")}
+                </div>
+              )}
             </li>
           )
         })}
